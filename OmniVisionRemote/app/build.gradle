@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace 'com.example.omnivisionremote'
+    namespace 'com.sasha.omnivisionremote'
     compileSdk 33
 
     defaultConfig {
-        applicationId "com.example.omnivisionremote"
+        applicationId "com.sasha.omnivisionremote"
         minSdk 21
         targetSdk 33
         versionCode 1

@@ -12,22 +12,31 @@ class IRBridge(private val context: Context) {
 
     @JavascriptInterface
     fun hasIrEmitter(): Boolean {
-        return irManager?.hasIrEmitter() ?: false
+        val hasIr = irManager?.hasIrEmitter() ?: false
+        if (!hasIr) {
+            showToast("Errore: Trasmettitore IR non trovato su questo dispositivo")
+        }
+        return hasIr
     }
 
     @JavascriptInterface
     fun transmit(frequency: Int, patternStr: String) {
         val irManager = irManager ?: return
-        if (!irManager.hasIrEmitter()) return
+        if (!irManager.hasIrEmitter()) {
+            showToast("Questo telefono non ha una porta IR")
+            return
+        }
 
         try {
-            // Converte la stringa CSV "10,20,30" in un array di Int
             val pattern = patternStr.split(",")
                 .map { it.trim().toInt() }
                 .toIntArray()
             
             irManager.transmit(frequency, pattern)
+            // Messaggio di debug per confermare che l'app sta provando a trasmettere
+            showToast("Segnale inviato (${frequency}Hz)")
         } catch (e: Exception) {
+            showToast("Errore trasmissione: ${e.message}")
             e.printStackTrace()
         }
     }
