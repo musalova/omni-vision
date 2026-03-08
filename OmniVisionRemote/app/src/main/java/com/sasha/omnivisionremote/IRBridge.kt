@@ -12,20 +12,20 @@ class IRBridge(private val context: Context) {
 
     @JavascriptInterface
     fun hasIrEmitter(): Boolean {
-        val hasIr = irManager?.hasIrEmitter() ?: false
-        if (!hasIr) {
-            showToast("Errore: Trasmettitore IR non trovato su questo dispositivo")
-        }
-        return hasIr
+        return irManager?.hasIrEmitter() ?: false
+    }
+
+    // Restituisce le frequenze supportate dal sensore IR del telefono
+    @JavascriptInterface
+    fun getSupportedFrequencies(): String {
+        val ranges = irManager?.carrierFrequencies ?: return ""
+        return ranges.joinToString(";") { "${it.minFrequency}-${it.maxFrequency}" }
     }
 
     @JavascriptInterface
     fun transmit(frequency: Int, patternStr: String) {
         val irManager = irManager ?: return
-        if (!irManager.hasIrEmitter()) {
-            showToast("Questo telefono non ha una porta IR")
-            return
-        }
+        if (!irManager.hasIrEmitter()) return
 
         try {
             val pattern = patternStr.split(",")
@@ -33,12 +33,17 @@ class IRBridge(private val context: Context) {
                 .toIntArray()
             
             irManager.transmit(frequency, pattern)
-            // Messaggio di debug per confermare che l'app sta provando a trasmettere
-            showToast("Segnale inviato (${frequency}Hz)")
         } catch (e: Exception) {
-            showToast("Errore trasmissione: ${e.message}")
             e.printStackTrace()
         }
+    }
+
+    // Questa funzione verrà chiamata dalla PWA per avviare il "Wizard di Scansione"
+    // Invierà un segnale di test e mostrerà un feedback all'utente
+    @JavascriptInterface
+    fun testCode(brand: String, frequency: Int, patternStr: String) {
+        transmit(frequency, patternStr)
+        showToast("Provando codice per: $brand...")
     }
 
     @JavascriptInterface
