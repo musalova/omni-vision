@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OMNI Vision Remote Suite</title>
+    <link rel="stylesheet" href="styles/main.css" />
+  </head>
+  <body>
+    <div id="app" class="app-shell">
+      <header class="app-header">
+        <div class="brand-block">
+          <span class="brand-logo">OMNI Vision</span>
+        </div>
+        <div class="header-actions">
+          <select id="tv-selector" aria-label="Televisore collegato"></select>
+          <button id="detect-tv" class="ghost-btn">Trova la mia TV</button>
+          <button
+            id="assistant-toggle"
+            class="ghost-btn helper-btn"
+            aria-expanded="false"
+            aria-controls="detection-popover"
+          >
+            Assistente
+          </button>
+          <div id="detection-popover" class="detection-popover" hidden role="dialog" aria-live="polite">
+            <p class="detection-popover-title">Assistente configurazione</p>
+            <div class="detection-meta">
+              <p class="detection-line" id="assistant-tv-line"></p>
+              <p class="detection-line" id="assistant-status-line"></p>
+            </div>
+            <div id="detection-feedback" class="detection-feedback"></div>
+            <button id="assistant-detect" class="helper-action">Avvia ricerca automatica</button>
+          </div>
+        </div>
+      </header>
+
+      <div id="update-banner" class="update-banner" hidden role="status" aria-live="polite">
+        <span id="update-text"></span>
+        <button id="update-reload" class="ghost-btn">Aggiorna ora</button>
+      </div>
+
+      <nav class="app-nav" role="tablist">
+        <button class="nav-btn active" data-view-target="remote" role="tab" aria-selected="true">
+          Telecomando
+        </button>
+        <button class="nav-btn" data-view-target="guide" role="tab" aria-selected="false">Programmi</button>
+        <button class="nav-btn" data-view-target="suggestions" role="tab" aria-selected="false">
+          Suggeriti
+        </button>
+      </nav>
+
+      <main class="view-container">
+        <section class="view remote-view active" data-view="remote" aria-label="Telecomando virtuale">
+          <section class="panel remote-panel">
+            <div class="panel-header">
+              <h2>Telecomando OMNI Vision</h2>
+            </div>
+            <div id="remote-container"></div>
+          </section>
+        </section>
+
+        <section class="view" data-view="guide" aria-label="Guida programmi">
+          <section class="panel guide-panel">
+            <div class="panel-header">
+              <h2>Guida TV OMNI Vision</h2>
+              <div class="guide-filters">
+                <select id="channel-filter"></select>
+                <select id="genre-filter"></select>
+                <input type="number" id="channel-number-filter" placeholder="Numero canale" aria-label="Filtra per numero" min="1" />
+                <input
+                  type="search"
+                  id="program-search"
+                  placeholder="Cerca titolo, canale o genere"
+                  aria-label="Cerca programma"
+                />
+                <button id="refresh-guide" class="ghost-btn">Aggiorna</button>
+              </div>
+            </div>
+            <div class="scroll-area">
+              <div id="guide-container" class="guide-list"></div>
+            </div>
+          </section>
+        </section>
+
+        <section class="view" data-view="suggestions" aria-label="Suggerimenti">
+          <section class="panel suggestions-panel">
+            <div class="panel-header">
+              <h2>Suggerimenti OMNI Vision</h2>
+              <button id="refresh-suggestions" class="ghost-btn">Ricalcola</button>
+            </div>
+            <div class="scroll-area">
+              <div id="suggestions-container"></div>
+            </div>
+          </section>
+        </section>
+      </main>
+    </div>
+
+    <div class="numeric-overlay" id="numeric-overlay" aria-hidden="true" role="dialog" aria-label="Seleziona canale">
+      <div class="numeric-panel">
+        <header>
+          <h3>Seleziona canale</h3>
+          <button id="numeric-close" class="ghost-btn">Chiudi</button>
+        </header>
+        <div class="numeric-grid" id="numeric-grid">
+          <button data-digit="1">1</button>
+          <button data-digit="2">2</button>
+          <button data-digit="3">3</button>
+          <button data-digit="4">4</button>
+          <button data-digit="5">5</button>
+          <button data-digit="6">6</button>
+          <button data-digit="7">7</button>
+          <button data-digit="8">8</button>
+          <button data-digit="9">9</button>
+          <button data-digit="0">0</button>
+        </div>
+      </div>
+    </div>
+
+    <template id="program-card-template">
+      <article class="program-card">
+        <header>
+          <div>
+            <p class="program-channel"></p>
+            <h3 class="program-title"></h3>
+          </div>
+          <span class="program-time"></span>
+        </header>
+        <p class="program-meta"></p>
+        <p class="program-description"></p>
+        <footer>
+          <button class="ghost-btn btn-watch-now">Guarda ora</button>
+          <button class="ghost-btn btn-more-info">Dettagli</button>
+        </footer>
+      </article>
+    </template>
+
+    <script type="module" src="src/main.js"></script>
+  </body>
+</html>
