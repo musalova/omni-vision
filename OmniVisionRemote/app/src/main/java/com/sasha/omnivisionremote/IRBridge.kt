@@ -18,7 +18,6 @@ class IRBridge(private val context: Context) {
     private val irManager: ConsumerIrManager? = 
         context.getSystemService(Context.CONSUMER_IR_SERVICE) as? ConsumerIrManager
 
-    // Codici Power di base per test (Samsung, LG, Sony, Panasonic)
     private val commonCodes = mapOf(
         "Samsung" to intArrayOf(169, 169, 21, 63, 21, 63, 21, 63, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 63, 21, 63, 21, 63, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 63, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 63, 21, 21, 21, 63, 21, 63, 21, 63, 21, 63, 21, 63, 21, 1794),
         "LG" to intArrayOf(9000, 4500, 560, 560, 560, 560, 560, 1690, 560, 560, 560, 560, 560, 560, 560, 560, 560, 560, 560, 1690, 560, 1690, 560, 560, 560, 1690, 560, 1690, 560, 1690, 560, 1690, 560, 1690, 560, 560, 560, 560, 560, 560, 560, 1690, 560, 560, 560, 560, 560, 560, 560, 560, 560, 1690, 560, 1690, 560, 560, 560, 1690, 560, 1690, 560, 1690, 560, 1690, 560, 1690, 560, 40000),
@@ -29,24 +28,9 @@ class IRBridge(private val context: Context) {
     fun hasIrEmitter(): Boolean = irManager?.hasIrEmitter() ?: false
 
     @JavascriptInterface
-    fun startAutoScan() {
-        if (!hasIrEmitter()) {
-            showToast("Il tuo telefono non ha un trasmettitore IR")
-            return
-        }
-        
-        Thread {
-            for ((brand, pattern) in commonCodes) {
-                (context as? android.app.Activity)?.runOnUiThread {
-                    showToast("Provando codice per: $brand...")
-                }
-                irManager?.transmit(38000, pattern)
-                Thread.sleep(2000) // Aspetta 2 secondi tra un tentativo e l'altro
-            }
-            (context as? android.app.Activity)?.runOnUiThread {
-                showToast("Scansione terminata. Se la TV non ha risposto, serve il codice specifico.")
-            }
-        }.start()
+    fun testCodeNativo(brand: String) {
+        val pattern = commonCodes[brand] ?: return
+        irManager?.transmit(38000, pattern)
     }
 
     @JavascriptInterface
