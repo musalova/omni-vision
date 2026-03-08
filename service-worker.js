@@ -14,12 +14,10 @@ const ASSETS = [
   'src/state/store.js',
   'src/data/irProfiles.js',
   'src/data/programs.js',
-  'config/app.config.json',
-  'config/program-data.json',
 ];
 
 const ASSET_URLS = ASSETS.map((path) => new URL(path, self.location.origin).toString());
-const NETWORK_FIRST_PATHS = ['/config/'];
+const NETWORK_FIRST_PATHS = [];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
