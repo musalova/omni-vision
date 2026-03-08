@@ -218,6 +218,53 @@ function setDetectionButtonsLoading(isLoading) {
   }
 }
 
+function updateDetectionGuidance(customMessage, tone = 'info') {
+  if (customMessage) {
+    setDetectionFeedback(customMessage, tone);
+    updateAssistantMeta();
+    return;
+  }
+
+  const activeTv = getActiveTv();
+  if (!activeTv) {
+    setDetectionFeedback('Seleziona una TV dall’elenco in alto.', 'info');
+    updateAssistantMeta();
+    return;
+  }
+
+  if (activeTv.detectedProfileId) {
+    setDetectionFeedback(`Profilo ${activeTv.detectedProfileId} configurato per ${activeTv.name}.`, 'success');
+    updateAssistantMeta();
+    return;
+  }
+
+  if (activeTv.id === 'auto-discovery') {
+    setDetectionFeedback('Premi "Trova la mia TV" per cercare automaticamente il profilo.', 'info');
+    updateAssistantMeta();
+    return;
+  }
+
+  setDetectionFeedback(`Non conosci il codice per ${activeTv.name}? Prova "Trova la mia TV".`, 'warning');
+  updateAssistantMeta();
+}
+
+function setDetectionFeedback(message, tone = 'info') {
+  if (!detectionFeedback) return;
+  detectionFeedback.textContent = message;
+  detectionFeedback.className = `detection-feedback ${tone}`;
+}
+
+function updateAssistantMeta() {
+  const activeTv = getActiveTv();
+  if (assistantTvLine) {
+    assistantTvLine.textContent = activeTv ? `TV selezionata: ${activeTv.name}` : 'Nessuna TV selezionata';
+  }
+  if (assistantStatusLine) {
+    const status = activeTv ? irService.getStatus(activeTv.id) : 'profilo non disponibile';
+    assistantStatusLine.textContent = `Stato profilo: ${status}`;
+  }
+}
+
 async function autoDetectMissingProfiles() {
   if (autoDetectionRan) return;
   autoDetectionRan = true;
@@ -454,6 +501,11 @@ function updateTvSelector() {
   tvSelector.innerHTML = currentState.tvProfiles
     .map((tv) => `<option value="${tv.id}" ${tv.id === currentState.activeTvId ? 'selected' : ''}>${tv.name}</option>`)
     .join('');
+}
+
+function getActiveTv() {
+  const state = store.getState();
+  return state.tvProfiles.find((tv) => tv.id === state.activeTvId);
 }
 
 function getGuideFilters() {
