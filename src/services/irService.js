@@ -2,7 +2,7 @@ import { irProfiles } from '../data/irProfiles.js';
 
 class IrService {
   constructor() {
-    this.mode = 'mock';
+    this.mode = 'native'; // Proviamo ad usare il bridge nativo se disponibile
     this.detectedProfiles = new Map();
   }
 
@@ -41,7 +41,15 @@ class IrService {
   }
 
   async testProfile(profile) {
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    // Se siamo su Android, inviamo un comando reale di test (es. Mute o Info)
+    if (window.AndroidIR && window.AndroidIR.hasIrEmitter()) {
+      const testCmd = profile.commands['mute'] || Object.values(profile.commands)[0];
+      if (testCmd) {
+        window.AndroidIR.transmit(testCmd.frequency, testCmd.pattern.join(','));
+      }
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, 800));
     const score = profile.brand === 'Zephir' || profile.brand === 'Generic' ? 0.8 : 0.4;
     const success = Math.random() < score;
     return { success };
@@ -54,11 +62,28 @@ class IrService {
       return { success: false, reason: 'missing_profile' };
     }
     const profile = this.getProfile(profileId);
-    const code = profile?.commands[command];
+    const cmdData = profile?.commands[command];
 
-    console.log('[IR] Sending command', command, 'with code', code);
-    await new Promise((resolve) => setTimeout(resolve, 200));
-    return { success: Boolean(code), code };
+    if (!cmdData) {
+      console.warn('[IR] Comando non trovato nel profilo', command);
+      return { success: false, reason: 'command_not_found' };
+    }
+
+    console.log('[IR] Sending command', command, 'with frequency', cmdData.frequency);
+
+    // BRIDGE NATIVO ANDROID
+    if (window.AndroidIR && window.AndroidIR.hasIrEmitter()) {
+      try {
+        window.AndroidIR.transmit(cmdData.frequency, cmdData.pattern.join(','));
+        return { success: true, native: true };
+      } catch (e) {
+        console.error('[IR] Errore bridge nativo', e);
+      }
+    }
+
+    // Fallback Mock per testing browser
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    return { success: true, code: cmdData.pattern };
   }
 }
 
